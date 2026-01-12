@@ -62,15 +62,28 @@ pipeline {
         steps {
             withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
                 sh '''
-                    git config user.email "san.n1597@gmail.com"
-                    git config user.name "Santosh Nagaraj"
-                    git checkout main
-                    git pull origin main
-                    BUILD_NUMBER=${BUILD_NUMBER}
-                    sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml
-                    git add java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml
-                    git commit -m "Update deployment image to version ${BUILD_NUMBER}"
-                    git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
+                  set -e
+                  
+                  git config user.email "san.n1597@gmail.com"
+                  git config user.name "Santosh Nagaraj"
+                  
+                  git checkout main
+                  git pull origin main
+                  
+                  BUILD_NUMBER=${BUILD_NUMBER}
+                  
+                  sed -i "s|image: .*|image: santu1234dockers/ultimate-cicd:${BUILD_NUMBER}|" \
+                    java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml
+                  
+                  git add java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml
+                  
+                  # Commit ONLY if something changed
+                  if ! git diff --cached --quiet; then
+                     git commit -m "Update deployment image to version ${BUILD_NUMBER}"
+                     git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git main
+                  else
+                     echo "No deployment changes detected. Skipping commit."
+                  fi
                 '''
             }
         }
