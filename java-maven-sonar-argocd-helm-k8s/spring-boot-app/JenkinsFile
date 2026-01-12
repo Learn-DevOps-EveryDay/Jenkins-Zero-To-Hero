@@ -29,6 +29,8 @@ pipeline {
             docker run --rm \
              -v $PWD:/usr/src \
              sonarsource/sonar-scanner-cli:5 \
+             -Dsonar.projectKey=spring-boot-demo \
+             -Dsonar.projectName=spring-boot-demo \
              -Dsonar.projectBaseDir=/usr/src/java-maven-sonar-argocd-helm-k8s/spring-boot-app \
              -Dsonar.host.url=http://16.171.193.121:9000 \
              -Dsonar.token=$SONAR_AUTH_TOKEN
