@@ -26,11 +26,12 @@ pipeline {
       steps {
         withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
           sh '''
-            cd java-maven-sonar-argocd-helm-k8s/spring-boot-app
-            mvn clean verify \
-            org.sonarsource.scanner.maven:sonar-maven-plugin:3.11.0.3922:sonar \
-            -Dsonar.login=$SONAR_AUTH_TOKEN \
-            -Dsonar.host.url=$SONAR_URL
+            docker run --rm \
+             -v $PWD:/usr/src \
+             sonarsource/sonar-scanner-cli:5 \
+             -Dsonar.projectBaseDir=/usr/src/java-maven-sonar-argocd-helm-k8s/spring-boot-app \
+             -Dsonar.host.url=http://16.171.193.121:9000 \
+             -Dsonar.token=$SONAR_TOKEN
           '''
         }
       }
